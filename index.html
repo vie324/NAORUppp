@@ -6,17 +6,30 @@
     <title>整体院 経営総合ダッシュボード</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <script async src="https://ga.jspm.io/npm:es-module-shims@1.7.0/dist/es-module-shims.js"></script>
+
+    <!-- ES Module Imports (React, ReactDOM, Lucide) -->
     <script type="importmap">
     {
       "imports": {
-        "react": "https://esm.sh/react@18.2.0?dev",
-        "react-dom/client": "https://esm.sh/react-dom@18.2.0/client?dev",
-        "lucide-react": "https://esm.sh/lucide-react@0.292.0?bundle"
+        "react": "https://esm.sh/react@18.2.0",
+        "react-dom": "https://esm.sh/react-dom@18.2.0?external=react",
+        "react-dom/client": "https://esm.sh/react-dom@18.2.0/client?external=react",
+        "lucide-react": "https://esm.sh/lucide-react@0.292.0?external=react"
       }
     }
     </script>
+    <script src="https://ga.jspm.io/npm:es-module-shims@1.7.0/dist/es-module-shims.js"></script>
+    <script type="module">
+        import React from 'react';
+        import * as ReactDOMClient from 'react-dom/client';
+        import * as LucideReact from 'lucide-react';
+
+        // Export to global scope for Babel script
+        window.React = React;
+        window.ReactDOM = { createRoot: ReactDOMClient.createRoot };
+        window.LucideReact = LucideReact;
+    </script>
+
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
     <style>
@@ -29,16 +42,26 @@
 <body class="bg-slate-50">
     <div id="root"></div>
 
-    <script type="text/babel" data-type="module">
-        import React, { useState, useMemo, useEffect, useRef } from 'react';
-        import { createRoot } from 'react-dom/client';
-        import {
-            TrendingUp, Users, Target, Calendar, MapPin,
+    <script type="text/babel">
+        // Wait for all ESM modules to load and export globals
+        const waitForGlobals = () => new Promise(resolve => {
+            const check = () => {
+                if (window.React && window.ReactDOM && window.LucideReact) {
+                    resolve();
+                } else {
+                    setTimeout(check, 50);
+                }
+            };
+            check();
+        });
+
+        // These will be initialized after modules load
+        let useState, useMemo, useEffect, useRef, createRoot;
+        let TrendingUp, Users, Target, Calendar, MapPin,
             Search, Award, BarChart3, DollarSign, Heart,
             MessageSquare, Star, Gift, CheckCircle, Info,
             Filter, Download, ChevronRight, Activity, Wallet, Loader2, AlertCircle,
-            Hash, Percent, RefreshCw, ChevronDown, Check, Trophy
-        } from 'lucide-react';
+            Hash, Percent, RefreshCw, ChevronDown, Check, Trophy;
 
         const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbzVslBpl0zqDx0m6DWgvl_uvDTD2ROXyAQOJvTSVnT0RtDeGA5H65vJWdywaGgcyN8_/exec';
 
@@ -604,10 +627,50 @@
             </div>
         );
 
-        // Reactマウント処理
-        const container = document.getElementById('root');
-        const root = createRoot(container);
-        root.render(<App />);
+        // Reactマウント処理 (すべてのESMモジュールの読み込みを待ってから実行)
+        waitForGlobals().then(() => {
+            // Initialize React hooks from global React
+            useState = React.useState;
+            useMemo = React.useMemo;
+            useEffect = React.useEffect;
+            useRef = React.useRef;
+            createRoot = ReactDOM.createRoot;
+
+            // Initialize icons from LucideReact
+            const LucideIcons = window.LucideReact;
+            TrendingUp = LucideIcons.TrendingUp;
+            Users = LucideIcons.Users;
+            Target = LucideIcons.Target;
+            Calendar = LucideIcons.Calendar;
+            MapPin = LucideIcons.MapPin;
+            Search = LucideIcons.Search;
+            Award = LucideIcons.Award;
+            BarChart3 = LucideIcons.BarChart3;
+            DollarSign = LucideIcons.DollarSign;
+            Heart = LucideIcons.Heart;
+            MessageSquare = LucideIcons.MessageSquare;
+            Star = LucideIcons.Star;
+            Gift = LucideIcons.Gift;
+            CheckCircle = LucideIcons.CheckCircle;
+            Info = LucideIcons.Info;
+            Filter = LucideIcons.Filter;
+            Download = LucideIcons.Download;
+            ChevronRight = LucideIcons.ChevronRight;
+            Activity = LucideIcons.Activity;
+            Wallet = LucideIcons.Wallet;
+            Loader2 = LucideIcons.Loader2;
+            AlertCircle = LucideIcons.AlertCircle;
+            Hash = LucideIcons.Hash;
+            Percent = LucideIcons.Percent;
+            RefreshCw = LucideIcons.RefreshCw;
+            ChevronDown = LucideIcons.ChevronDown;
+            Check = LucideIcons.Check;
+            Trophy = LucideIcons.Trophy;
+
+            const container = document.getElementById('root');
+            const root = createRoot(container);
+            root.render(<App />);
+        });
     </script>
 </body>
 </html>
